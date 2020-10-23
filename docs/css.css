@@ -1,0 +1,49 @@
+.date {
+	text-align: center;
+	padding: 2rem;
+	font-size: 6rem;
+	color: #fff;
+	background-color: #999;
+}
+
+.block {
+	margin-bottom: 9rem;
+	margin-top: 3rem;
+}
+
+.title {
+	font-size: 8rem;
+	text-align: center;
+	border-bottom: 1px solid #ccc;
+	margin-top: 2rem;
+}
+
+.title2 {
+	font-size: 6rem;
+	text-align: center;
+	margin-top: 2rem;
+	border-bottom: 1px solid #ccc;
+}
+
+.infected {
+	font-size: 6rem;
+	text-align: center;
+}
+
+.tested {
+	font-size: 4rem;
+	text-align: center;
+}
+
+.rate {
+	font-size: 4rem;
+	text-align: center;
+}
+
+.positiverate {
+
+}
+
+.inzidenzrate {
+
+}
