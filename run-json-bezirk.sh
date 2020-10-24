@@ -4,8 +4,14 @@ bezirk=$1
 
 mkdir -p "docs/data/$bezirk"
 
+# rewrite Wien to Wien(Stadt) for Bezirke
+bezirkgrep=$bezirk
+if [[ "$bezirk" == "Wien(Stadt)" ]]; then
+	bezirkgrep="Wien(Stadt)"
+fi
+
 # extract number of inhabitants
-numinhabitants=$(grep -R --include 'CovidFaelle_GKZ.csv' "${bezirk};" austria-covid-data/* | awk -F';' -v OFS=';' '{print $3}' | tail -n 1)
+numinhabitants=$(grep -R --include 'CovidFaelle_GKZ.csv' "${bezirkgrep};" austria-covid-data/* | awk -F';' -v OFS=';' '{print $3}' | tail -n 1)
 
 items=( )
 lastday=""
