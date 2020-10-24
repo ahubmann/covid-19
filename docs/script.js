@@ -1,10 +1,10 @@
 (function() {
-	async function fetchDatapoints(location, numHours) {
+	async function fetchDatapoints(location, numPoints) {
 		let date = new Date();
 		const data = [];
 		let inhabitants = 0;
-		while (data.length < numHours) {
-			let fetchdate = date.toISOString().replace(/(.*)T.*/, "$1");
+		while (data.length < numPoints) {
+			let fetchdate = fetchDate(date);
 			let json = await fetchData(fetchdate, location);
 			data.unshift(...json.data);
 			inhabitants = json.inhabitants
@@ -19,8 +19,7 @@
 	}
 
 	function fetchAndDisplay(location, hours, selector) {
-		fetchDatapoints(location, hours).then(data => {
-			console.log(data);
+		fetchDatapoints(location, hours + 1).then(data => {
 			// first and xth item
 			let now = data.data[0];
 			let then = data.data[hours];
@@ -43,18 +42,13 @@
 		});
 	}
 
-	function displayDate(date) {
+	function fetchDate(date) {
 		let day = date.getDate();
 		if (day < 10) day = "0" + day;
-		let month = date.getMonth();
+		let month = date.getMonth() + 1;
 		if (month < 10) month = "0" + month;
 		let year = date.getFullYear()
-		let hour = date.getHours();
-		if (hour < 10) hour = "0" + hour;
-		let minute = date.getMinutes();
-		if (minute < 10) minute = "0" + minute;
-
-		return `${day}.${month}.${year} ${hour}:${minute}`
+		return `${year}-${month}-${day}`
 	}
 
 	fetchAndDisplay("austria", 24, ".austria ._24hours");
