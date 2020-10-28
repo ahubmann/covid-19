@@ -46,13 +46,24 @@ function fetchAndDisplay(location, hours, block) {
 			tested = now.tested - then.tested;
 			positiveRate = (infected / tested) * 100;
 		}
-		block.querySelector(".infected").innerText = infected >= 0 ? "+" + infected : "-" + infected;
-		if (now.tested) {
-			block.querySelector(".tested").innerText = tested;
-			block.querySelector(".positiverate").innerText = Number.parseFloat(positiveRate).toFixed(2) + "%";
+		let hospital = 0;
+		let icu = 0;
+		if (now.hospital) {
+			hospital = now.hospital - then.hospital;
+			icu = now.icu - then.icu;
 		}
-		block.querySelector(".inzidenzrate").innerText = Number.parseFloat(inzidenzRate).toFixed(2);
-		block.querySelector(".inzidenzrateweek").innerText = "[" + Number.parseFloat(inzidenzRateWeek).toFixed(2) + "]";
+
+		block.querySelector(".infected").innerText = infected >= 0 ? "+" + infected : infected;
+		if (now.tested) {
+			block.querySelector(".tested").innerText = tested + " Tests";
+			block.querySelector(".positiverate").innerText = Number.parseFloat(positiveRate).toFixed(2) + "% positiv";
+		}
+		if (now.hospital) {
+			block.querySelector(".numhospital").innerText = (hospital >= 0 ? "+" + hospital : hospital) + " Spital = " + now.hospital;
+			block.querySelector(".numicu").innerText = (icu > 0 ? "+" + icu : icu) + " Intensiv = " + now.icu;
+		}
+		block.querySelector(".inzidenzrate").innerText = Number.parseFloat(inzidenzRate).toFixed(2) + "/Tag";
+		block.querySelector(".inzidenzrateweek").innerText = Number.parseFloat(inzidenzRateWeek).toFixed(2) + "/Woche";
 		displayDate(now.date);
 
 		const canvas = block.querySelector(".chart").getContext("2d");
@@ -185,6 +196,16 @@ function createHTML(location, ranges) {
 		const inzidenzrateweek = document.createElement("span");
 		inzidenzrateweek.setAttribute("class", "inzidenzrateweek");
 		rateBlock.appendChild(inzidenzrateweek);
+
+		const hospital = document.createElement("div");
+		hospital.setAttribute("class", "hospital");
+		const hospitalOccupancy = document.createElement("span");
+		hospitalOccupancy.setAttribute("class", "numhospital");
+		hospital.appendChild(hospitalOccupancy);
+		const icuOccupancy = document.createElement("span");
+		icuOccupancy.setAttribute("class", "numicu");
+		hospital.appendChild(icuOccupancy);
+		rangeBlock.appendChild(hospital);
 
 		const chartCanvas = document.createElement("canvas");
 		chartCanvas.setAttribute("class", "chart");
