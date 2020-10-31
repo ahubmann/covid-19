@@ -1,4 +1,3 @@
-//import "./chart.js/Chart.min.js";
 import "./chart.js/Chart.bundle.min.js";
 
 const bezirke = ["Österreich", "Amstetten", "Baden", "Bludenz", "Braunau am Inn", "Bregenz", "Bruck an der Leitha", "Bruck-Mürzzuschlag", "Deutschlandsberg", "Dornbirn", "Eferding", "Eisenstadt(Stadt)", "Eisenstadt-Umgebung", "Feldkirch", "Feldkirchen", "Freistadt", "Gänserndorf", "Gmünd", "Gmunden", "Graz(Stadt)", "Graz-Umgebung", "Grieskirchen", "Güssing", "Hallein", "Hartberg-Fürstenfeld", "Hermagor", "Hollabrunn", "Horn", "Imst", "Innsbruck-Land", "Innsbruck-Stadt", "Jennersdorf", "Kirchdorf an der Krems", "Kitzbühel", "Klagenfurt Land", "Klagenfurt Stadt", "Korneuburg", "Krems an der Donau(Stadt)", "Krems(Land)", "Kufstein", "Landeck", "Leibnitz", "Leoben", "Lienz", "Liezen (inkl. Gröbming)", "Lilienfeld", "Linz(Stadt)", "Linz-Land", "Mattersburg", "Melk", "Mistelbach", "Mödling", "Murau", "Murtal", "Neunkirchen", "Neusiedl am See", "Oberpullendorf", "Oberwart", "Perg", "Reutte", "Ried im Innkreis", "Rohrbach", "Rust(Stadt)", "Salzburg(Stadt)", "Salzburg-Umgebung", "Sankt Johann im Pongau", "Sankt Pölten(Land)", "Sankt Pölten(Stadt)", "Sankt Veit an der Glan", "Schärding", "Scheibbs", "Schwaz", "Spittal an der Drau", "Steyr(Stadt)", "Steyr-Land", "Südoststeiermark", "Tamsweg", "Tulln", "Urfahr-Umgebung", "Villach Land", "Villach Stadt", "Vöcklabruck", "Voitsberg", "Völkermarkt", "Waidhofen an der Thaya", "Waidhofen an der Ybbs(Stadt)", "Weiz", "Wels(Stadt)", "Wels-Land", "Wien(Stadt)", "Wiener Neustadt(Land)", "Wiener Neustadt(Stadt)", "Wolfsberg", "Zell am See", "Zwettl"]
@@ -17,10 +16,10 @@ async function fetchDatapoints(location, numPoints) {
 			inhabitants = response.inhabitants
 		} catch (ex) {
 		}
-		date.setDate(date.getDate()-1);
+		date.setDate(date.getDate() - 1);
 	}
 	data.reverse();
-	return { inhabitants, data };
+	return { inhabitants, data: data.slice(0, numPoints) };
 }
 
 async function fetchData(location, date) {
@@ -40,8 +39,8 @@ function fetchAndDisplay(location, hours, block) {
 		const infected = now.infected - then.infected;
 		let tested = 0;
 		let positiveRate = 0;
-		const inzidenzRate = infected / data.inhabitants * 100000;
-		const inzidenzRateWeek = inzidenzRate / hours * 24 * 7;
+		const inzidenzRate = infected / hours * 24 / data.inhabitants * 100000;
+		const inzidenzRateWeek = inzidenzRate * 7;
 		if (now.tested) {
 			tested = now.tested - then.tested;
 			positiveRate = (infected / tested) * 100;
@@ -76,7 +75,10 @@ function fetchAndDisplay(location, hours, block) {
 			type: "linear",
 			display: true,
 			id: "points",
-			position: "left"
+			position: "left",
+			ticks: {
+				beginAtZero: true
+			}
 		}];
 		if (hours > 25) {
 			datasets.push({
@@ -92,13 +94,16 @@ function fetchAndDisplay(location, hours, block) {
 				position: "right",
 				gridLines: {
 					drawOnChartArea: false
+				},
+				ticks: {
+					beginAtZero: true
 				}
 			});
 		}
 		new Chart(canvas, {
 			type: "bar",
 			data: {
-				labels: data.data.map(d => d.date.replace(/.*T(.*):.*:.*/,"$1:00")).reverse().slice(1),
+				labels: data.data.map(d => d.date).reverse().slice(1),
 				datasets: datasets
 			},
 			options: {
@@ -108,6 +113,9 @@ function fetchAndDisplay(location, hours, block) {
 					display: false
 				},
 				scales: {
+					xAxes: [{
+						type: "time"
+					}],
 					yAxes: yAxes
 				}
 			}

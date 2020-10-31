@@ -38,20 +38,20 @@ body {
 }
 
 .tested {
-	font-size: 2rem;
+	font-size: 1.5rem;
 	text-align: center;
 }
 
 .rate {
-	font-size: 1.5rem;
+	font-size: 1rem;
 	text-align: center;
 }
 
 .hospital {
-	font-size: 1.5rem;
+	font-size: 1rem;
 	text-align: center;
 }
 
 .positiverate, .inzidenzrate, .numhospital, .numicu {
-	margin: 0 1rem 0 1rem;
+	margin: 0 0.5rem 0 0.5rem;
 }
