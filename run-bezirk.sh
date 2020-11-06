@@ -4,13 +4,22 @@ date=$2
 
 # rewrite Wien to Wien(Stadt) for Bezirke
 bezirkgrep=$bezirk
-if [[ "$bezirk" == "Wien" ]]; then
-	bezirkgrep="Wien(Stadt)"
+if [[ "$bezirk" == 'Wien' ]]; then
+    bezirkgrep='Wien(Stadt)'
 fi
 
-if [[ "$date" = "" ]]; then
-	date="data-*"
-else
-	date="data-$date-*"
+# zipgrep somehow dislikes "(" and ")"
+bezirkgrep="${bezirkgrep//\(/\[\(\]}"
+bezirkgrep="${bezirkgrep//\)/\[\)\]}"
+
+if [[ "$date" == '' ]]; then
+    date="$(date '+%Y-%m-%d')"
 fi
-grep -R --include 'Bezirke.csv' "${bezirkgrep};" austria-covid-data/data/$date austria-covid-data/manual/ | awk -F';' -v OFS=';' '{print $NF";"$2}' | tr -d "\r" | sort -u > "data/data-${bezirk}.csv"
+
+> "data/data-${bezirk}.csv"
+pathdate="${date//-/}"
+for file in coronaDAT/archive/${pathdate}/data/*; do
+    zipgrep "${bezirkgrep};" ${file} 'Bezirke.csv' | awk -F';' -v OFS=';' '{print $NF";"$2}' | tr -d '\r' >> "data/data-${bezirk}.csv"
+done
+
+sort -o "data/data-${bezirk}.csv" -u "data/data-${bezirk}.csv"

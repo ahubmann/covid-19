@@ -7,7 +7,7 @@ mkdir -p "docs/data/$bezirk"
 # rewrite Wien to Wien(Stadt) for Bezirke
 bezirkgrep=$bezirk
 if [[ "$bezirk" == "Wien(Stadt)" ]]; then
-	bezirkgrep="Wien(Stadt)"
+    bezirkgrep='Wien(Stadt)'
 fi
 
 # extract number of inhabitants

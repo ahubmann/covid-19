@@ -3,41 +3,35 @@
 force=$1
 date=$2
 
-if [[ "$date" = "" ]]; then
-  date="2020"
+if [[ "${date}" == '' ]]; then
+    date="$(date '+%Y-%m-%d')"
 fi
 
-if [[ "$force" = "force" ]]; then
-  cd austria-covid-data
-  git pull
-  cd ..
-  $( cd austria-covid-data/manual/ && curl -s https://covid19-dashboard.ages.at/data/data.zip | bsdtar -xvf- )
+if [[ "${force}" == 'skip' ]]; then
+    :
+elif [[ "${force}" == 'force' ]]; then
+    cd coronaDAT
+    git pull
+    cd ..
 else
-
-  echo "Pull data?"
-  select yn in "Yes" "No"; do
-    case $yn in
-      Yes)
-        echo "Pulling new data ..."
-        cd austria-covid-data
-        git pull
-        cd ..
-        break;;
-      No) break;;
-    esac
-  done
-
-  echo "Fetch directly?"
-  select yn in "Yes" "No"; do
-    case $yn in
-      Yes)
-        echo
-        echo "Fetching newest data directly..."
-        $( cd austria-covid-data/manual/ && curl -s https://covid19-dashboard.ages.at/data/data.zip | bsdtar -xvf- )
-        break;;
-      No) break;;
-    esac
-  done
+    echo 'Pull data?'
+    select yn in 'Yes' 'No'; do
+        case $yn in
+            Yes)
+                echo 'Pulling new data ...'
+                cd coronaDAT
+                git pull
+                cd ..
+                break;;
+            No) break;;
+        esac
+    done
 fi
 
-grep -R --include 'AllgemeinDaten.csv' "$date" austria-covid-data/* | awk -F';' -v OFS=';' '{print $NF";"$2";"$6";"$10";"$8";"$11";"$9}' | tr -d "\r" | sort -u > "data/data-austria.csv"
+> 'data/data-austria.csv'
+pathdate="${date//-/}"
+for file in coronaDAT/archive/${pathdate}/data/*; do
+    zipgrep "${date}" ${file} 'AllgemeinDaten.csv' | awk -F';' -v OFS=';' '{print $NF";"$2";"$6";"$10";"$8";"$11";"$9}' | tr -d '\r' >> 'data/data-austria.csv'
+done
+
+sort -o 'data/data-austria.csv' -u 'data/data-austria.csv'
