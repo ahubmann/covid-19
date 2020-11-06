@@ -5,7 +5,7 @@ const ranges = [24, 7*24, 30*24];
 
 async function fetchDatapoints(location, numPoints) {
 	const date = new Date();
-	const data = [];
+	let data = [];
 	let inhabitants = 0;
 	let circuitBreaker = 300;
 	while (data.length < numPoints && circuitBreaker > 0) {
@@ -17,9 +17,64 @@ async function fetchDatapoints(location, numPoints) {
 		} catch (ex) {
 		}
 		date.setDate(date.getDate() - 1);
+		// make sure we have consecutive datapoints
+		// if not, interpolate data
+		data = interpolate(data);
 	}
 	data.reverse();
 	return { inhabitants, data: data.slice(0, numPoints) };
+}
+
+function interpolate(data) {
+	let previous = null;
+	let interpolatedData = [];
+	data.forEach((item, i) => {
+		if (i == 0) {
+			previous = item;
+			interpolatedData.push(item);
+			return;
+		}
+		let previousDate = getDate(previous.date);
+		let itemDate = getDate(item.date)
+		let timeDiff = itemDate.getTime() - previousDate.getTime();
+		if (timeDiff > 90 * 60 * 1000) {
+			// more than 1 hour, but we need hourly data
+			let missedHours = timeDiff / (60 * 60 * 1000);
+			let steps = {};
+			for (const [key, value] of Object.entries(item)) {
+				if (key == "date") {
+					continue;
+				}
+				steps[key] = (item[key] - previous[key]) / missedHours;
+			}
+			for (let hour = 1; hour < missedHours; hour++) {
+				let newDate = new Date(previousDate);
+				newDate.setHours(newDate.getHours() + hour);
+				let newItem = {
+					date: isoDate(newDate)
+				};
+				for (const [key, value] of Object.entries(steps)) {
+					newItem[key] = Math.round(previous[key] + hour * steps[key]);
+				}
+				interpolatedData.push(newItem);
+			}
+		}
+		interpolatedData.push(item);
+		previous = item;
+	});
+	return interpolatedData;
+}
+
+function getDate(date) {
+	// format is yyyy-mm-ddThh:mm:ss
+	let year = Number.parseInt(date.substring(0,4));
+	let month = Number.parseInt(date.substring(5,7)) - 1;
+	let day = Number.parseInt(date.substring(8,10));
+	let hour = Number.parseInt(date.substring(11,13));
+	let minute = Number.parseInt(date.substring(14,16));
+	let second = Number.parseInt(date.substring(17,19));
+
+	return new Date(year, month, day, hour, minute, second);
 }
 
 async function fetchData(location, date) {
@@ -156,13 +211,25 @@ function getDataForChart(data, averaging) {
 	}
 	return chartData;
 }
+
 function fetchDate(date) {
 	let day = date.getDate();
 	if (day < 10) day = "0" + day;
 	let month = date.getMonth() + 1;
 	if (month < 10) month = "0" + month;
-	let year = date.getFullYear()
-	return `${year}-${month}-${day}`
+	let year = date.getFullYear();
+	return `${year}-${month}-${day}`;
+}
+
+function isoDate(date) {
+	let datePart = fetchDate(date);
+	let hours = date.getHours();
+	if (hours < 10) hours = "0" + hours;
+	let minutes = date.getMinutes();
+	if (minutes < 10) minutes = "0" + minutes;
+	let seconds = date.getSeconds();
+	if (seconds < 10) seconds = "0" + seconds;
+	return `${datePart}T${hours}:${minutes}:${seconds}`;
 }
 
 function createHTML(location, ranges) {
