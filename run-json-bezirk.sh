@@ -11,7 +11,7 @@ if [[ "$bezirk" == "Wien(Stadt)" ]]; then
 fi
 
 # extract number of inhabitants
-numinhabitants=$(grep -R --include 'CovidFaelle_GKZ.csv' "${bezirkgrep};" austria-covid-data/* | awk -F';' -v OFS=';' '{print $3}' | tail -n 1)
+numinhabitants=$(zipgrep "${bezirkgrep};" coronaDAT/archive/20201101/data/20201101_230200_orig_csv.zip 'CovidFaelle_GKZ.csv' | awk -F';' -v OFS=';' '{print $3}' | tail -n 1)
 
 items=( )
 lastday=""
