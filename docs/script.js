@@ -37,7 +37,7 @@ function interpolate(data) {
 		let previousDate = getDate(previous.date);
 		let itemDate = getDate(item.date)
 		let timeDiff = itemDate.getTime() - previousDate.getTime();
-		if (timeDiff > 90 * 60 * 1000) {
+		if (timeDiff > 2.5 * 60 * 60 * 1000) {
 			// more than 1 hour, but we need hourly data
 			let missedHours = timeDiff / (60 * 60 * 1000);
 			let steps = {};
