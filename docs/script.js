@@ -110,7 +110,7 @@ function fetchAndDisplay(location, hours, block) {
 		block.querySelector(".infected").innerText = infected >= 0 ? "+" + infected : infected;
 		if (now.tested) {
 			block.querySelector(".tested").innerText = tested + " Tests";
-			block.querySelector(".positiverate").innerText = Number.parseFloat(positiveRate).toFixed(2) + "% positiv";
+			block.querySelector(".positiverate").innerText = "(" + Number.parseFloat(positiveRate).toFixed(2) + "%)";
 		}
 		if (now.hospital) {
 			block.querySelector(".numhospital").innerText = (hospital >= 0 ? "+" + hospital : hospital) + " Spital = " + now.hospital;
@@ -233,64 +233,49 @@ function isoDate(date) {
 }
 
 function createHTML(location, ranges) {
-	const outerBlock = document.createElement("div");
-	outerBlock.setAttribute("class", "block");
-	const title = document.createElement("div");
-	title.setAttribute("class", "title");
-	title.innerHTML = location == "austria" ? "Österreich" : location;
-	outerBlock.appendChild(title);
+	const title = location === "austria" ? "Österreich" : location;
+	const outerTemplate = `
+		<div class="location mt-5">
+			<h1 class="display-4 mb-3">${title}</h1>
+			<div class="block row row-cols-1 row-cols-md-2 row-cols-xl-3"></div>
+		</div>
+	`;
+	document.querySelector(".datablock").insertAdjacentHTML("beforeend", outerTemplate);
+	const outerBlock = document.querySelector(".datablock").querySelector(".location:last-child").querySelector(".block");
 	ranges.forEach(range => {
-		const rangeBlock = document.createElement("div");
-		rangeBlock.setAttribute("class", "range");
-
-		const rangeTitle = document.createElement("div");
-		rangeTitle.setAttribute("class", "title2");
-		rangeTitle.innerHTML = displayRange(range);
-		rangeBlock.appendChild(rangeTitle);
-
-		const infected = document.createElement("div");
-		infected.setAttribute("class", "infected");
-		rangeBlock.appendChild(infected);
-
-		const tested = document.createElement("div");
-		tested.setAttribute("class", "tested");
-		rangeBlock.appendChild(tested);
-
-		const rateBlock = document.createElement("div");
-		rateBlock.setAttribute("class", "rate");
-		rangeBlock.appendChild(rateBlock);
-
-		const positiverate = document.createElement("span");
-		positiverate.setAttribute("class", "positiverate");
-		rateBlock.appendChild(positiverate);
-
-		const inzidenzrate = document.createElement("span");
-		inzidenzrate.setAttribute("class", "inzidenzrate");
-		rateBlock.appendChild(inzidenzrate);
-
-		const inzidenzrateweek = document.createElement("span");
-		inzidenzrateweek.setAttribute("class", "inzidenzrateweek");
-		rateBlock.appendChild(inzidenzrateweek);
-
-		const hospital = document.createElement("div");
-		hospital.setAttribute("class", "hospital");
-		const hospitalOccupancy = document.createElement("span");
-		hospitalOccupancy.setAttribute("class", "numhospital");
-		hospital.appendChild(hospitalOccupancy);
-		const icuOccupancy = document.createElement("span");
-		icuOccupancy.setAttribute("class", "numicu");
-		hospital.appendChild(icuOccupancy);
-		rangeBlock.appendChild(hospital);
-
-		const chartCanvas = document.createElement("canvas");
-		chartCanvas.setAttribute("class", "chart");
-		rangeBlock.appendChild(chartCanvas);
-
-		outerBlock.appendChild(rangeBlock);
-
+		const template = `
+			<div class="range col mb-4">
+			<div class="card">
+				<h5 class="card-header">
+					${displayRange(range)}
+					<button type="button" class="close">&times;</button>
+				</h5>
+				<div class="card-body">
+					<h3 class="text-center font-weight-bold infected"></h3>
+					<h5 class="text-center"><span class="tested"></span> <small class="positiverate"></small></h5>
+					<div class="text-center rate">
+						<span class="text-nowrap mr-1 inzidenzrate"></span>
+						<span class="text-nowrap inzidenzrateweek"></span>
+					</div>
+					<div class="text-center hospital">
+						<span class="text-nowrap mr-1 numhospital"></span>
+						<span class="text-nowrap numicu"></span>
+					</div>
+					<canvas class="chart"></canvas>
+				</div>
+			</div>
+			</div>
+		`;
+		outerBlock.insertAdjacentHTML("beforeend", template);
+		const rangeBlock = outerBlock.querySelector(".range:last-child");
+		const close = rangeBlock.querySelector(".close");
+		close.addEventListener("click", () => {
+			updateHash("delete", location, range);
+			startup();
+		});
 		fetchAndDisplay(location, range, rangeBlock);
 	});
-	document.querySelector(".datablock").appendChild(outerBlock);
+	
 }
 
 function displayRange(range) {
@@ -303,58 +288,52 @@ function displayDate(date) {
 }
 
 function renderSelector() {
-	const block = document.createElement("div");
-	block.setAttribute("class", "selector");
-	const selectBezirk = document.createElement("select");
-	selectBezirk.setAttribute("class", "bezirke");
-	block.appendChild(selectBezirk);
+	const block = document.querySelector(".selector");
+	const selectBezirk = block.querySelector(".bezirke");
 	bezirke.forEach(bezirk => {
 		const option = document.createElement("option");
 		option.setAttribute("value", bezirk);
 		option.appendChild(document.createTextNode(bezirk));
 		selectBezirk.appendChild(option);
 	});
-	const selectRange = document.createElement("select");
-	selectRange.setAttribute("class", "range");
-	block.appendChild(selectRange);
+	const selectRange = block.querySelector(".range");
 	ranges.forEach(range => {
 		const option = document.createElement("option");
 		option.setAttribute("value", range);
 		option.appendChild(document.createTextNode(displayRange(range)));
 		selectRange.appendChild(option);
 	});
-	const action = document.createElement("button");
-	action.setAttribute("class", "action");
-	action.appendChild(document.createTextNode("GO"));
-	block.appendChild(action);
+	const action = block.querySelector(".add-btn");
 	action.addEventListener("click", () => {
 		const bezirk = selectBezirk.value;
 		const range = selectRange.value;
-
-		const data = parseHash();
-		let found = false;
-		data.forEach(item => {
-			if (item.location == bezirk || (item.location == "austria" && bezirk == "Österreich")) {
-				item.ranges.push(range);
-				found = true;
-			}
-		});
-		if (! found) {
-			data.push({location: bezirk, ranges: [range]});
-		}
-		writeHash(data);
+		updateHash("add", bezirk, range);
 		startup();
 	});
-	const clear = document.createElement("button");
-	clear.setAttribute("class", "action");
-	clear.appendChild(document.createTextNode("Clear"));
-	block.appendChild(clear);
+	const clear = block.querySelector(".clear-btn");
 	clear.addEventListener("click", () => {
 		writeHash([]);
 		startup();
 	});
+}
 
-	document.querySelector(".selectorblock").appendChild(block);
+function updateHash(action, bezirk, range) {
+	const data = parseHash();
+	let found = false;
+	data.forEach(item => {
+		if (item.location === bezirk || (item.location === "austria" && bezirk === "Österreich")) {
+			if (action === "add") {
+				item.ranges.push(range);
+				found = true;
+			} else if (action === "delete") {
+				item.ranges = item.ranges.filter(r => r != range);
+			}
+		}
+	});
+	if (! found && action === "add") {
+		data.push({location: bezirk, ranges: [range]});
+	}
+	writeHash(data);
 }
 
 function parseHash() {
@@ -374,8 +353,10 @@ function parseHash() {
 function writeHash(data) {
 	let hash = "";
 	data.forEach(item => {
-		let location = item.location == "Österreich" ? "austria" : item.location;
-		hash += ";" + location + "=" + item.ranges.join(",");
+		if (item.ranges.length > 0) {
+			let location = item.location == "Österreich" ? "austria" : item.location;
+			hash += ";" + location + "=" + item.ranges.join(",");
+		}
 	});
 	window.location.hash = hash;
 }

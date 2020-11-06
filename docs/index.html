@@ -2,12 +2,25 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>COVID-19</title>
-    <link rel="stylesheet" href="css.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   </head>
   <body>
-    <div class="date"></div>
-    <div class="selectorblock"></div>
-    <div class="datablock"></div>
+    <nav class="navbar navbar-dark bg-dark">
+      <a class="navbar-brand date" href="#"></a>
+      <form class="form-inline my-2 selector">
+        <select class="form-control custom-select mr-2 bezirke">
+        </select>
+        <select class="form-control custom-select mr-2 range">
+        </select>
+        <div class="btn-group">
+          <button class="btn btn-outline-light add-btn">+</button>
+          <button class="btn btn-outline-light mr-2 clear-btn">&times;</button>
+        </div>
+      </form>
+    </nav>
+    <div class="container-fluid">
+      <div class="datablock"></div>
+    </div>
     <script type="module" src="script.js"></script>
   </body>
 </html>
