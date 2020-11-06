@@ -17,6 +17,6 @@ for bezirk in "${bezirke[@]}"; do
     ./run-json-bezirk.sh "${bezirk}"
 done
 
-#git add docs/data
-#git commit -m "updating data"
-#git push origin main
+git add docs/data
+git commit -m "updating data"
+git push origin main
