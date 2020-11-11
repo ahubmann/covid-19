@@ -342,7 +342,7 @@ function parseHash() {
 	hash.split(";").forEach(locationAndRange => {
 		let [location, ranges] = locationAndRange.split("=");
 		if (location && ranges) {
-			location = location.replaceAll("+", " ");
+			location = location.replaceAll("+", " ").replaceAll("%20", " ");
 			ranges = ranges.split(",").map(x => parseInt(x));
 			data.push({location, ranges});
 		}
