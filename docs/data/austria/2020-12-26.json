@@ -1,1 +1,1 @@
-{"inhabitants": 8858775, "data": [{ "date": "2020-12-26T00:02:00", "infected": 347805, "tested": 3732153, "hospital": 2203, "hospitalbeds": 5168, "icu": 445, "icubeds": 569 }]}
+{"inhabitants": 8858775, "data": [{ "date": "2020-12-26T00:02:00", "infected": 347805, "tested": 3732153, "hospital": 2203, "hospitalbeds": 5168, "icu": 445, "icubeds": 569 },{ "date": "2020-12-26T01:02:00", "infected": 347808, "tested": 3732153, "hospital": 2203, "hospitalbeds": 5168, "icu": 445, "icubeds": 569 }]}
